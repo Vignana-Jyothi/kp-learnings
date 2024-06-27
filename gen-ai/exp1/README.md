@@ -21,13 +21,7 @@ source ~/kpenvs/GenAI/bin/activate
 
 ```
 pip install --upgrade pip
-pip install transformers[torch]
-sudo apt install uvicorn
-pip install fastapi
-pip install pandas
-pip install torchvision
-pip install opencv-python
-
+pip install -r requirements.txt
 
 ```
 This installs 
