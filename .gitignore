@@ -161,3 +161,9 @@ cython_debug/
 *.pyc
 __pycache__/
 *.pt
+
+## GPT related
+gpt_results/
+gpt2-finetuned/
+cached_lm_GPT*Tokenizer_*.txt
+cached_lm_GPT*Tokenizer_*.txt.lock

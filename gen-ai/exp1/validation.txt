@@ -1,0 +1,10 @@
+Day 5: Optimization and Future Directions
+1. Optimizing Generative Models:
+   * Learn about hyperparameter tuning and other techniques to improve model performance
+2. Future of Generative AI in Engineering:
+   * Discuss emerging applications and research directions in generative AI for engineering
+Day 6: Project Showcase and Discussion
+1. Student Presentations:
+   * Participants present their lab experiments and results, focusing on the chosen engineering problem and the effectiveness of the generative model
+2. Group Discussion:
+   * Open forum to discuss challenges faced, potential improvements, and future applications of generative AI in engineering
