@@ -17,11 +17,24 @@ python3 -m venv GenAI
 source ~/kpenvs/GenAI/bin/activate
 ```
 
+### Kaggle account
+mkdir ~/.kaggle 
+
+Create Account https://www.kaggle.com/
+Goto > https://www.kaggle.com/settings  > Account > API > Create
+Download kaggle.json and save in ~/.kaggle
+
+chmod 600 ~/.kaggle/kaggle.json
+
+
 ### Install required packages
 
 ```
 pip install --upgrade pip
 pip install -r requirements.txt
+
+pip install kaggle
+
 
 ```
 This installs 
