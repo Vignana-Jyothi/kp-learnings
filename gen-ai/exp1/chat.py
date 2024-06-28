@@ -18,7 +18,15 @@ async def chat(request: Request):
     question = data.get("question")
     inputs = tokenizer.encode(question, return_tensors="pt")
     
-    outputs = model.generate(inputs, max_length=500, num_return_sequences=1, temperature=0.7, top_k=1)
+    outputs = model.generate(
+        inputs, 
+        max_length=100,  # Decrease max_length to avoid repetition
+        num_return_sequences=1, 
+        temperature=0.5, 
+        #top_k=100,  # Increase top_k for more diverse output
+        top_p=0.9  # Use top-p sampling
+    )
+
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     
     end_time = time.time()
