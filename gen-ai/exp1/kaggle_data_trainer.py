@@ -1,5 +1,5 @@
 import os
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments
 import json
 import pandas as pd
@@ -73,6 +73,9 @@ def combine_context_and_question(data):
 combined_train = combine_context_and_question(flattened_train)
 combined_validation = combine_context_and_question(flattened_validation)
 
+# Load the dataset
+dataset = load_dataset('json', data_files={'train': train_file, 'validation': validation_file})
+
 # Tokenization
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 tokenizer.pad_token = tokenizer.eos_token  # Set the padding token to be the same as the end-of-sequence token
@@ -83,12 +86,12 @@ def preprocess_function(examples):
     return model_inputs
 
 # Convert the combined text to a format suitable for the tokenizer
-train_data = {'text': combined_train}
-validation_data = {'text': combined_validation}
+train_data = Dataset.from_dict({'text': combined_train})
+validation_data = Dataset.from_dict({'text': combined_validation})
 
 # Apply the preprocess function to the combined text
-tokenized_train = preprocess_function(train_data)
-tokenized_validation = preprocess_function(validation_data)
+tokenized_train = train_data.map(preprocess_function, batched=True, remove_columns=["text"])
+tokenized_validation = validation_data.map(preprocess_function, batched=True, remove_columns=["text"])
 
 # Fine-Tuning
 model = GPT2LMHeadModel.from_pretrained('gpt2')
