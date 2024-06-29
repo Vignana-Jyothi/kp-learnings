@@ -1,54 +1,96 @@
 import os
 from datasets import load_dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments
+import json
+import pandas as pd
+import numpy as np
 
 # Define the paths to the dataset files
 data_dir = os.path.expanduser('~/kp-learnings/kaggle/sf-qa-dataset')
 train_file = os.path.join(data_dir, 'train-v1.1.json')
 validation_file = os.path.join(data_dir, 'dev-v1.1.json')
 
+# Function to convert SQuAD JSON to DataFrame for training
+def squad_json_to_dataframe_train(input_file_path, record_path=['data', 'paragraphs', 'qas', 'answers'], verbose=1):
+    if verbose:
+        print("Reading the json file")
+    with open(input_file_path, 'r') as f:
+        file = json.load(f)
+    if verbose:
+        print("processing...")
+    js = pd.json_normalize(file, record_path)
+    m = pd.json_normalize(file, record_path[:-1])
+    r = pd.json_normalize(file, record_path[:-2])
+    idx = np.repeat(r['context'].values, r.qas.str.len())
+    ndx = np.repeat(m['id'].values, m['answers'].str.len())
+    m['context'] = idx
+    js['q_idx'] = ndx
+    main = pd.concat([m[['id', 'question', 'context']].set_index('id'), js.set_index('q_idx')], axis=1, sort=False).reset_index()
+    main['c_id'] = main['context'].factorize()[0]
+    if verbose:
+        print("shape of the dataframe is {}".format(main.shape))
+        print("Done")
+    return main
+
+# Function to convert SQuAD JSON to DataFrame for validation
+def squad_json_to_dataframe_dev(input_file_path, record_path=['data', 'paragraphs', 'qas', 'answers'], verbose=1):
+    if verbose:
+        print("Reading the json file")
+    with open(input_file_path, 'r') as f:
+        file = json.load(f)
+    if verbose:
+        print("processing...")
+    js = pd.json_normalize(file, record_path)
+    m = pd.json_normalize(file, record_path[:-1])
+    r = pd.json_normalize(file, record_path[:-2])
+    idx = np.repeat(r['context'].values, r.qas.str.len())
+    m['context'] = idx
+    main = m[['id', 'question', 'context', 'answers']].set_index('id').reset_index()
+    main['c_id'] = main['context'].factorize()[0]
+    if verbose:
+        print("shape of the dataframe is {}".format(main.shape))
+        print("Done")
+    return main
+
+# Convert JSON to DataFrame
+train_df = squad_json_to_dataframe_train(input_file_path=train_file)
+dev_df = squad_json_to_dataframe_dev(input_file_path=validation_file)
+
+# Flatten the dataset structure
+def flatten_dataset(df):
+    flattened_data = []
+    for _, row in df.iterrows():
+        flattened_data.append({'context': row['context'], 'question': row['question']})
+    return flattened_data
+
+flattened_train = flatten_dataset(train_df)
+flattened_validation = flatten_dataset(dev_df)
+
+# Extract the combined context and question strings for tokenization
+def combine_context_and_question(data):
+    return [f"{item['question']} {item['context']}" for item in data]
+
+combined_train = combine_context_and_question(flattened_train)
+combined_validation = combine_context_and_question(flattened_validation)
+
 # Load the dataset
 dataset = load_dataset('json', data_files={'train': train_file, 'validation': validation_file})
-
-# Inspect the structure of one example
-print(dataset['train'][0])
 
 # Tokenization
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
 def preprocess_function(examples):
-    contexts = []
-    questions = []
-    for example in examples['paragraphs']:
-        context = example['context']
-        qas = example['qas']
-        for qa in qas:
-            question = qa['question']
-            contexts.append(context)
-            questions.append(question)
-    
-    # Combine context and question for tokenization
-    inputs = [q + " " + c for q, c in zip(questions, contexts)]
+    inputs = examples['text']
     model_inputs = tokenizer(inputs, truncation=True, padding="max_length", max_length=128)
     return model_inputs
 
-# Flatten the dataset structure
-def flatten_dataset(batch):
-    flattened_data = []
-    for example in batch['data']:
-        for paragraph in example['paragraphs']:
-            context = paragraph['context']
-            for qa in paragraph['qas']:
-                flattened_data.append({'context': context, 'question': qa['question']})
-    return flattened_data
+# Convert the combined text to a format suitable for the tokenizer
+train_data = {'text': combined_train}
+validation_data = {'text': combined_validation}
 
-# Apply the flatten function to the dataset
-flattened_train = dataset['train'].map(flatten_dataset, batched=True)
-flattened_validation = dataset['validation'].map(flatten_dataset, batched=True)
-
-# Apply the preprocess function to the flattened dataset
-tokenized_train = flattened_train.map(preprocess_function, batched=True, remove_columns=["context", "question"])
-tokenized_validation = flattened_validation.map(preprocess_function, batched=True, remove_columns=["context", "question"])
+# Apply the preprocess function to the combined text
+tokenized_train = preprocess_function(train_data)
+tokenized_validation = preprocess_function(validation_data)
 
 # Fine-Tuning
 model = GPT2LMHeadModel.from_pretrained('gpt2')
