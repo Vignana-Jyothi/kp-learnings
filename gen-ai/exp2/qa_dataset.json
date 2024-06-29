@@ -1,0 +1,18 @@
+[
+    {
+        "context": "Mahatma Gandhi was a leader of the Indian independence movement against British rule. He led various campaigns and movements advocating for civil rights, social justice, and self-rule (Swaraj). Gandhi's philosophy of nonviolent resistance (Satyagraha) inspired mass participation and drew global attention to the cause of Indian independence. Key movements led by Gandhi included the Non-Cooperation Movement, the Salt March, and the Quit India Movement. His efforts were instrumental in uniting Indians across different regions and communities, ultimately leading to India's independence in 1947.",
+        "question": "What was Gandhi's role in the Indian independence movement?",
+        "answers": {
+            "text": ["Mahatma Gandhi was a leader of the Indian independence movement against British rule. He led various campaigns and movements advocating for civil rights, social justice, and self-rule (Swaraj)."],
+            "answer_start": [0]
+        }
+    },
+    {
+        "context": "The Salt March, led by Mahatma Gandhi in 1930, was a pivotal event in the Indian independence movement. It was a direct action campaign of tax resistance and nonviolent protest against the British salt monopoly. The 240-mile march to the Arabian Sea drew international attention to the Indian struggle for independence and demonstrated the power of mass civil disobedience. It marked a critical point in the fight for freedom, mobilizing millions of Indians and escalating the demand for complete self-rule.",
+        "question": "What is the significance of the Salt March?",
+        "answers": {
+            "text": ["The Salt March, led by Mahatma Gandhi in 1930, was a pivotal event in the Indian independence movement."],
+            "answer_start": [0]
+        }
+    }
+]
