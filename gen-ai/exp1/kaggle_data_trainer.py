@@ -73,11 +73,9 @@ def combine_context_and_question(data):
 combined_train = combine_context_and_question(flattened_train)
 combined_validation = combine_context_and_question(flattened_validation)
 
-# Load the dataset
-dataset = load_dataset('json', data_files={'train': train_file, 'validation': validation_file})
-
 # Tokenization
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+tokenizer.pad_token = tokenizer.eos_token  # Set the padding token to be the same as the end-of-sequence token
 
 def preprocess_function(examples):
     inputs = examples['text']
